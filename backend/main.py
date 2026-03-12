@@ -7,9 +7,11 @@ app = FastAPI()
 class Question(BaseModel):
     question: str
 
+
 @app.get("/")
 def home():
     return {"message": "Student RAG Assistant Running"}
+
 
 @app.post("/chat")
 def chat(q: Question):

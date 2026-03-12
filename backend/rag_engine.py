@@ -35,28 +35,32 @@ def ask_question(query):
 
     docs = retriever.invoke(query)
 
-    for doc in docs:
-        print(doc.metadata)
-
-    context = "\n\n".join([doc.page_content for doc in docs])
+    context = "\n\n".join(
+        [f"{d.page_content}\n(Source:{d.metadata})" for d in docs]
+    )
 
     prompt = f"""
 Bạn là trợ lý học vụ của trường đại học.
 
-Hãy sử dụng thông tin từ các tài liệu sau để trả lời câu hỏi.
+Dựa vào các thông tin sau từ tài liệu của trường để trả lời.
 
 {context}
 
 Câu hỏi: {query}
 
-Trả lời:
+Trả lời rõ ràng và nếu có thể hãy nhắc đến nguồn.
 """
 
     response = llm.invoke(prompt)
 
-    sources = list(set([doc.metadata.get("source","unknown") for doc in docs]))
+    sources = []
+
+    for d in docs:
+        sources.append(
+            f"{d.metadata.get('source')} (page {d.metadata.get('page')})"
+        )
 
     return {
         "answer": response.content,
-        "sources": sources
+        "sources": list(set(sources))
     }
