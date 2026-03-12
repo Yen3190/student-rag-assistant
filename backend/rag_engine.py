@@ -17,12 +17,16 @@ db = Chroma(
     embedding_function=embeddings
 )
 
+# retriever = db.as_retriever(
+#     search_type="mmr",
+#     search_kwargs={
+#         "k":6,
+#         "fetch_k":20
+#     }
+# )
+
 retriever = db.as_retriever(
-    search_type="mmr",
-    search_kwargs={
-        "k":6,
-        "fetch_k":20
-    }
+    search_kwargs={"k":8}
 )
 
 llm = ChatGoogleGenerativeAI(

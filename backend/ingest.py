@@ -43,13 +43,23 @@ def ingest():
 
     # Chia nhỏ text
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
-        chunk_overlap=50
+        chunk_size=600,
+        chunk_overlap=150
     )
 
     chunks = splitter.split_documents(docs)
 
     print("Total chunks:", len(chunks))
+
+    print("Example chunk:\n")
+    print(chunks[0].page_content)
+    print("--------------")
+
+    for c in chunks:
+        if "Công nghệ" in c.page_content or "Artificial Intelligence" in c.page_content:
+            print("FOUND IT CHUNK:")
+            print(c.page_content)
+
 
     # Embedding model miễn phí
     embeddings = HuggingFaceEmbeddings(
