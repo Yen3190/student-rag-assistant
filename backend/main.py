@@ -16,4 +16,4 @@ def chat(q: Question):
 
     result = ask_question(q.question)
 
-    return {"answer": result}
+    return result

@@ -34,6 +34,8 @@ def ingest():
     )
 
     db.persist()
+    print("Total docs:", len(docs))
+    print("Total chunks:", len(chunks))
 
     print("Data ingested successfully")
 
