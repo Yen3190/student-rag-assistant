@@ -4,11 +4,15 @@ langchain
 langchain-community
 langchain-google-genai
 langchain-huggingface
+langchain-groq
 langchain-chroma
 google-generativeai
 sentence-transformers
 chromadb
 pypdf
+pytesseract
 python-multipart
+pdf2image
 python-dotenv
 langchain-text-splitters
+pillow

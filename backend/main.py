@@ -42,3 +42,29 @@ async def upload_file(file: UploadFile = File(...)):
 @app.get("/history")
 def history():
     return get_history()
+
+@app.get("/files")
+def list_files():
+
+    files = os.listdir(DATA_PATH)
+
+    return {"files": files}
+
+@app.delete("/delete/{filename}")
+def delete_file(filename: str):
+
+    path = os.path.join(DATA_PATH, filename)
+
+    if os.path.exists(path):
+        os.remove(path)
+        return {"message": "file deleted"}
+
+    return {"error": "file not found"}
+
+
+@app.post("/reindex")
+def rebuild():
+
+    ingest()
+
+    return {"message": "database rebuilt"}
