@@ -16,3 +16,6 @@ pdf2image
 python-dotenv
 langchain-text-splitters
 pillow
+
+numpy
+tqdm
