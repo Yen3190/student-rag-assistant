@@ -9,7 +9,8 @@ from langchain_core.documents import Document
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(".env.local")
 
 # đường dẫn OCR
 #pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -19,8 +20,8 @@ pytesseract.pytesseract.tesseract_cmd = os.getenv("TESSERACT_PATH", "tesseract")
 #POPPLER_PATH = r"C:\poppler-25.12.0\Library\bin"
 POPPLER_PATH = os.getenv("POPPLER_PATH")
 
-DATA_PATH = "data"
-DB_PATH = "chroma_db"
+DB_PATH = os.getenv("DB_PATH", "chroma_db")
+DATA_PATH = os.getenv("DATA_PATH", "data")
 
 
 def extract_text_from_scan(pdf_path, filename):
@@ -30,10 +31,6 @@ def extract_text_from_scan(pdf_path, filename):
 
     print("Running OCR for:", filename)
 
-    # images = convert_from_path(
-    #     pdf_path,
-    #     poppler_path=POPPLER_PATH
-    # )
     if POPPLER_PATH:
         images = convert_from_path(
             pdf_path,
