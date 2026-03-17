@@ -1,14 +1,22 @@
 import sqlite3
 
-conn = sqlite3.connect("chat_history.db", check_same_thread=False)
-cursor = conn.cursor()
+DB_PATH = "chat_history.db"
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS chats (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    question TEXT,
-    answer TEXT
-)
-""")
+def get_connection():
+    return sqlite3.connect(DB_PATH)
 
-conn.commit()
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS chats (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        question TEXT,
+        answer TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()

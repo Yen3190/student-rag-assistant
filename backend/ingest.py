@@ -1,7 +1,7 @@
 import os
 import shutil
 import pytesseract
-
+import re 
 from PIL import Image
 from pdf2image import convert_from_path
 
@@ -16,9 +16,31 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 DATA_PATH = "data"
 DB_PATH = "chroma_db"
 
+def normalize_text(text):
+    import re
 
+    text = text.replace("\n", " ")
+    text = re.sub(r"\s+", " ", text)
+
+    # gộp chữ rời
+    text = re.sub(r"(\b\w\b\s+){2,}\b\w\b", lambda m: m.group(0).replace(" ", ""), text)
+
+    # 🔥 sửa lỗi OCR phổ biến
+    fixes = {
+        "TrtrdNG": "Trường",
+        "Gidm": "Giám",
+        "DUG": "DỤC",
+        "Cdc": "Các",
+        "Lim": "Lưu",
+    }
+
+    for k, v in fixes.items():
+        text = text.replace(k, v)
+
+    return text.strip()
+
+# ================= OCR =================
 def extract_text_from_scan(pdf_path, filename):
-
     print("Running OCR for:", filename)
 
     images = convert_from_path(
@@ -30,14 +52,18 @@ def extract_text_from_scan(pdf_path, filename):
 
     for i, img in enumerate(images):
 
+        # 🔥 preprocess ảnh
+        img = img.convert("L")  
+        img = img.point(lambda x: 0 if x < 150 else 255)
+        img = img.resize((img.width * 2, img.height * 2))
+
         text = pytesseract.image_to_string(
             img,
             lang="vie+eng",
-            config="--oem 3 --psm 6"   # 🔥 FIX TABLE
+            config="--oem 3 --psm 4"
         )
 
-        if not text.strip():
-            text = "[OCR failed]"
+        text = normalize_text(text)
 
         docs.append(
             Document(
@@ -52,15 +78,33 @@ def extract_text_from_scan(pdf_path, filename):
     return docs
 
 
+
+def is_broken_text(text):
+    words = text.split()
+    if len(words) == 0:
+        return True
+
+    avg_len = sum(len(w) for w in words) / len(words)
+
+    if avg_len < 4:
+        return True
+
+    if text.count("\n") > 20:
+        return True
+
+    return False
+
+
+# ================= INGEST =================
 def ingest():
 
     docs = []
 
-    # ===== LOAD EXISTING FILES IN DB =====
     existing_sources = set()
 
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name="bkai-foundation-models/vietnamese-bi-encoder"
+        #model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
     if os.path.exists(DB_PATH):
@@ -87,10 +131,9 @@ def ingest():
         if not file.endswith(".pdf"):
             continue
 
-        # # ===== SKIP FILE ĐÃ CÓ =====
-        # if file in existing_sources:
-        #     print("Skipping (already in DB):", file)
-        #     continue
+        if file in existing_sources:
+            print("Skipping (already in DB):", file)
+            continue
 
         path = os.path.join(DATA_PATH, file)
 
@@ -103,25 +146,21 @@ def ingest():
 
         text_length = sum(len(p.page_content.strip()) for p in pages)
 
-        if text_length < 200:
-            print("PDF scan detected -> using OCR")
-            docs.extend(extract_text_from_scan(path, file))
-        else:
-            print("PDF text detected")
-            for p in pages:
-                p.metadata["source"] = file
-            docs.extend(pages)
+
+        raw_text = " ".join(p.page_content for p in pages)
+
+        print("Force OCR")
+        docs.extend(extract_text_from_scan(path, file))
 
     print("\nTotal pages:", len(docs))
 
-    # ===== KHÔNG CÓ FILE MỚI =====
     if not docs:
         print("No new documents to ingest")
         return
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=100
+        chunk_size=1200,
+        chunk_overlap=200
     )
 
     chunks = splitter.split_documents(docs)
@@ -134,7 +173,6 @@ def ingest():
     )
 
     db.add_documents(chunks)
-    
 
     print("\nIngest completed")
 
