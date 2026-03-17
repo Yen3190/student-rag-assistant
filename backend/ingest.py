@@ -87,10 +87,10 @@ def ingest():
         if not file.endswith(".pdf"):
             continue
 
-        # ===== SKIP FILE ĐÃ CÓ =====
-        if file in existing_sources:
-            print("Skipping (already in DB):", file)
-            continue
+        # # ===== SKIP FILE ĐÃ CÓ =====
+        # if file in existing_sources:
+        #     print("Skipping (already in DB):", file)
+        #     continue
 
         path = os.path.join(DATA_PATH, file)
 
@@ -99,9 +99,11 @@ def ingest():
         loader = PyPDFLoader(path)
         pages = loader.load()
 
+        print("Sample content:", pages[0].page_content[:200])
+
         text_length = sum(len(p.page_content.strip()) for p in pages)
 
-        if text_length < 50:
+        if text_length < 200:
             print("PDF scan detected -> using OCR")
             docs.extend(extract_text_from_scan(path, file))
         else:
@@ -118,8 +120,8 @@ def ingest():
         return
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=2000,     # 🔥 FIX mất bảng
-        chunk_overlap=300
+        chunk_size=800,
+        chunk_overlap=100
     )
 
     chunks = splitter.split_documents(docs)
