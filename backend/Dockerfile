@@ -18,14 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
-    pip install --no-cache-dir "numpy<2.0" && \
-    pip install --no-cache-dir accelerate transformers sentence-transformers && \
+    pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir "numpy<2.0" accelerate transformers sentence-transformers && \
     pip install --no-cache-dir -r requirements.txt
 
-RUN sed -i '1i import torch.nn as nn' /usr/local/lib/python3.10/site-packages/transformers/integrations/accelerate.py
+RUN sed -i '1i import torch' /usr/local/lib/python3.10/site-packages/transformers/integrations/accelerate.py
 
 COPY . .
 
