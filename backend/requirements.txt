@@ -12,5 +12,5 @@ langchain-groq
 sentence-transformers
 chromadb
 python-dotenv
-torch==2.2.1+cpu
-torchvision==0.17.1+cpu
+torch>=2.4.0+cpu
+torchvision>=0.19.0+cpu
