@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   backend:
-    image: thu09876/student-chatbot-backend:v23
+    image: thu09876/student-chatbot-backend:v24
     container_name: rag-backend
     ports:
       - "8000:8000"

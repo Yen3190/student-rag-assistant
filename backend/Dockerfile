@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     build-essential \
+    sed \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,7 +24,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir "numpy<2.0" && \
     pip install --no-cache-dir accelerate transformers sentence-transformers && \
     pip install --no-cache-dir -r requirements.txt
-# ---------------------------
+
+RUN sed -i '1i import torch.nn as nn' /usr/local/lib/python3.10/site-packages/transformers/integrations/accelerate.py
 
 COPY . .
 
