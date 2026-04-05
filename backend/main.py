@@ -34,6 +34,7 @@ class UserProfile(BaseModel):
     major: str = "Information Technology"
     university: str = "Van Lang University"
 
+
 # ================= 2. TRANG CHỦ & KIỂM TRA =================
 @app.get("/")
 def home():
@@ -119,7 +120,7 @@ def rebuild_database():
 
 # ================= 6. QUẢN LÝ NGƯỜI DÙNG =================
 
-# API: Lưu/Cập nhật thông tin khi đăng nhập (BẮT BUỘC PHẢI CÓ để lưu user mới)
+# API: Lưu/Cập nhật thông tin khi đăng nhập
 @app.post("/user/update_profile")
 def update_profile(profile: UserProfile):
     conn = get_connection()
@@ -170,3 +171,4 @@ def analytics():
     data = cursor.fetchall()
     conn.close()
     return [{"question": r[0], "count": r[1]} for r in data]
+

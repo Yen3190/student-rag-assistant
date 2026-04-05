@@ -66,7 +66,7 @@ function Documents() {
   return (
     <div style={{ padding: "30px" }}>
       <div className="card">
-        <h2>Documents (Kho tài liệu AI)</h2>
+        <h2>Documents</h2>
 
         {isAdmin && (
           <div

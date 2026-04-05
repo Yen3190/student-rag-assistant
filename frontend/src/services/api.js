@@ -1,11 +1,15 @@
 import axios from "axios";
 
-const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-  withCredentials: false,
-});
+const LOCAL_URL = "http://127.0.0.1:8000"; 
 
-// --- CHAT & FILE ---
+const API = axios.create({
+  baseURL: LOCAL_URL, 
+  withCredentials: false,
+  headers: {
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
+  },
+});
 export const askQuestion = (question, email) => API.post("/chat", { question, email });
 
 export const uploadFile = (file) => {
@@ -15,18 +19,12 @@ export const uploadFile = (file) => {
 };
 
 export const getFiles = () => API.get("/pdfs");
-
 export const deleteFile = (name) => API.delete(`/file/${encodeURIComponent(name)}`);
-
 export const rebuildAI = () => API.post("/rebuild");
-
 export const getHistory = (email) => API.get(`/history?email=${encodeURIComponent(email)}`);
-
 export const deleteHistoryChat = (id) => API.delete(`/history/${id}`);
-
 export const getAllUsers = () => API.get("/admin/users");
-
 export const deleteUser = (email) => API.delete(`/admin/user/${encodeURIComponent(email)}`);
-
 export const updateProfile = (data) => API.post("/user/update_profile", data);
 
+export default API;
