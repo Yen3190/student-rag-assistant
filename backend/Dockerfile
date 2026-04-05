@@ -20,8 +20,10 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir "numpy<2.0" && \
     pip install --no-cache-dir accelerate transformers sentence-transformers && \
     pip install --no-cache-dir -r requirements.txt
+# ---------------------------
 
 COPY . .
 
