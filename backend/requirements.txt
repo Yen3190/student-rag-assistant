@@ -11,3 +11,4 @@ langchain-groq
 sentence-transformers
 chromadb
 python-dotenv
+python-multipart

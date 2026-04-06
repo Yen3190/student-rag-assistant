@@ -2,15 +2,17 @@ version: "3.9"
 
 services:
   backend:
-    build: ./backend
-    image: thu09876/student-chatbot-backend:latest
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: rag-backend
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app
       - ./backend/data:/app/data
       - ./backend/chroma_db:/app/chroma_db
-      - ./backend/cache:/app/cache
+      - /tmp/cache:/tmp/cache
     env_file:
       - .env
     restart: always
@@ -19,7 +21,9 @@ services:
     build: ./frontend
     container_name: rag-frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
+    volumes:
+      - ./frontend:/app
     depends_on:
       - backend
     restart: always
