@@ -16,7 +16,6 @@ app = FastAPI()
 
 # ================= 1. CẤU HÌNH HỆ THỐNG =================
 
-# Cho phép Frontend gọi API (CORS)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,7 +25,7 @@ app.add_middleware(
 )
 
 DATA_PATH = "data"
-init_db() # Khởi tạo SQLite
+init_db()
 
 # Model dữ liệu để tránh lỗi 422
 class QuestionRequest(BaseModel):
@@ -48,10 +47,8 @@ def health():
 @app.post("/chat")
 def chat(q: QuestionRequest):
     try:
-        # Gọi AI trả lời
         result = ask_question(q.question)
         
-        # Lưu vào Database
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -75,7 +72,6 @@ def history(email: str = Query(...)):
         )
         data = cursor.fetchall()
         conn.close()
-        # Luôn trả về List để tránh lỗi .map() ở Frontend
         return [{"id": row[0], "question": row[1], "answer": row[2]} for row in data]
     except:
         return []
@@ -115,8 +111,8 @@ def delete_file(filename: str):
 
 @app.post("/rebuild")
 def rebuild_database():
-    ingest() # Đọc lại PDF
-    reload_db() # Cập nhật Vector DB
+    ingest()
+    reload_db()
     return {"message": "AI Rebuilt Successfully"}
 
 # ================= 4. QUẢN LÝ NGƯỜI DÙNG (ADMIN) =================
@@ -156,11 +152,9 @@ def delete_user(email: str):
 
 # ================= 5. PHỤC VỤ GIAO DIỆN (QUAN TRỌNG NHẤT) =================
 
-# 1. Mount folder assets chứa file .js, .css đã build từ React
 if os.path.exists("static/assets"):
     app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
 
-# 2. Mount folder static nói chung
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 3. Trang chủ
@@ -175,7 +169,7 @@ async def favicon():
         return FileResponse("static/favicon.ico")
     return FileResponse("static/index.html")
 
-# 5. Cấu hình Catch-all Route (Fix lỗi Refresh trang 404)
+# 5. Cấu hình Catch-all Route
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     # Nếu là file có thật (ảnh, js, css) thì trả về file đó
@@ -183,5 +177,5 @@ async def serve_frontend(full_path: str):
     if os.path.exists(file_path) and os.path.isfile(file_path):
         return FileResponse(file_path)
     
-    # Nếu không phải file (ví dụ gõ /history) thì trả về index.html cho React điều hướng
+    # Nếu không phải file thì trả về index.html cho React điều hướng
     return FileResponse("static/index.html")

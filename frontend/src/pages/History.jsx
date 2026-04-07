@@ -66,7 +66,7 @@ function History() {
         borderRadius: "15px", 
         boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         width: "100%",
-        maxWidth: "800px",
+        maxWidth: "1200px",
         boxSizing: "border-box",
         borderTop: "6px solid #92A8D1"
       }}>
