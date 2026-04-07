@@ -1,29 +1,15 @@
-version: "3.9"
-
+version: '3.8'
 services:
   backend:
-    build: 
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: rag-backend
+    image: thu000acr.azurecr.io/rag-backend:latest
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
-      - ./backend/data:/app/data
-      - ./backend/chroma_db:/app/chroma_db
-      - /tmp/cache:/tmp/cache
-    env_file:
-      - .env
     restart: always
 
   frontend:
-    build: ./frontend
-    container_name: rag-frontend
+    image: thu000acr.azurecr.io/rag-frontend:latest
     ports:
-      - "3000:80"
-    volumes:
-      - ./frontend:/app
+      - "80:80"
     depends_on:
       - backend
     restart: always

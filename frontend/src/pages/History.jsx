@@ -3,31 +3,54 @@ import { getHistory, deleteHistoryChat } from "../services/api";
 
 function History() {
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  const userLocal = JSON.parse(localStorage.getItem("user"));
+  // Lấy email từ LocalStorage, ưu tiên an toàn
+  const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
   const userEmail = userLocal?.email || "thunguyen465933@gmail.com";
 
   const load = async () => {
+    // Nếu không có email thì không gọi API để tránh lỗi 422
+    if (!userEmail) {
+      setHistory([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await getHistory(userEmail);
-      setHistory(Array.isArray(res.data) ? res.data : []); 
+      
+      // FIX LỖI .MAP: Kiểm tra kỹ res.data có phải là mảng không
+      if (res && res.data && Array.isArray(res.data)) {
+        setHistory(res.data);
+      } else {
+        setHistory([]); // Nếu không phải mảng thì cho mảng rỗng
+      }
     } catch (err) {
-      console.log("Cannot load history", err);
+      console.error("Lỗi khi tải lịch sử:", err);
+      setHistory([]); // Lỗi thì cũng cho mảng rỗng để không bị Crash trang
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  // Chỉ chạy load() khi component mount
+  useEffect(() => {
+    load();
+  }, []);
 
   const deleteOne = async (id) => {
-    if (!window.confirm("Bạn chắc chắn xóa?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa dòng lịch sử này?")) return;
     try {
       const res = await deleteHistoryChat(id);
-      if (res.status === 200) {
+      // Kiểm tra status 200 hoặc message từ backend mới
+      if (res.status === 200 || res.data?.message === "Deleted") {
         setHistory(prev => prev.filter(item => item.id !== id));
       }
     } catch (err) { 
       console.error("Lỗi khi xóa:", err);
-      alert("Lỗi khi xóa!"); 
+      alert("Không thể xóa lúc này, vui lòng thử lại!"); 
     }
   };
 
@@ -48,7 +71,7 @@ function History() {
         borderRadius: "15px", 
         boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         width: "100%",
-        maxWidth: "calc(100vw - 40px)",
+        maxWidth: "800px", // Chỉnh lại độ rộng cho đẹp
         boxSizing: "border-box",
         borderTop: "6px solid #92A8D1"
       }}>
@@ -64,10 +87,14 @@ function History() {
           flexWrap: "wrap"
         }}>
           <span>Lịch sử trò chuyện</span>
-          <span style={{ fontSize: "14px", color: "#A2B5BB", fontWeight: "normal" }}>{userEmail}</span>
+          <span style={{ fontSize: "14px", color: "#A2B5BB", fontWeight: "normal" }}>
+            {userEmail}
+          </span>
         </h2>
 
-        {history.length === 0 ? (
+        {loading ? (
+          <p style={{ textAlign: "center", marginTop: "40px", color: "#888" }}>Đang tải...</p>
+        ) : history.length === 0 ? (
           <p style={{ textAlign: "center", marginTop: "40px", color: "#888" }}>Chưa có lịch sử trò chuyện nào!</p>
         ) : (
           <div className="history-container" style={{ marginTop: "10px" }}>
@@ -75,13 +102,12 @@ function History() {
               <div key={h.id} style={{ 
                 marginTop: "20px", 
                 borderBottom: "1px solid #f9f9f9", 
-                paddingBottom: "20px", 
-                paddingRight: "40px", 
                 position: 'relative',
                 backgroundColor: "#fcfcfc",
                 padding: "15px",
                 borderRadius: "8px",
-                marginBottom: "10px"
+                marginBottom: "10px",
+                transition: "0.3s"
               }}>
                 <button 
                   onClick={() => deleteOne(h.id)} 
@@ -93,15 +119,13 @@ function History() {
                     cursor: 'pointer', 
                     background: 'none', 
                     border: 'none', 
-                    fontSize: '20px',
-                    transition: "0.3s"
+                    fontSize: '20px'
                   }}
-                  onMouseEnter={(e) => e.target.style.color = "#f5222d"}
-                  onMouseLeave={(e) => e.target.style.color = "#ff7875"}
+                  title="Xóa tin nhắn"
                 >
                   ✖
                 </button>
-                <p style={{ margin: "0 0 10px 0", lineHeight: "1.6" }}>
+                <p style={{ margin: "0 0 10px 0", lineHeight: "1.6", paddingRight: "30px" }}>
                   <b style={{ color: "#92A8D1" }}>Câu hỏi:</b> {h.question}
                 </p>
                 <p style={{ margin: 0, color: "#555", lineHeight: "1.6" }}>
