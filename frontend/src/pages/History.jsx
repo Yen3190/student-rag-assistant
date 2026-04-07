@@ -5,12 +5,10 @@ function History() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Lấy email từ LocalStorage, ưu tiên an toàn
   const userLocal = JSON.parse(localStorage.getItem("user") || "{}");
   const userEmail = userLocal?.email || "thunguyen465933@gmail.com";
 
   const load = async () => {
-    // Nếu không có email thì không gọi API để tránh lỗi 422
     if (!userEmail) {
       setHistory([]);
       setLoading(false);
@@ -21,21 +19,19 @@ function History() {
     try {
       const res = await getHistory(userEmail);
       
-      // FIX LỖI .MAP: Kiểm tra kỹ res.data có phải là mảng không
       if (res && res.data && Array.isArray(res.data)) {
         setHistory(res.data);
       } else {
-        setHistory([]); // Nếu không phải mảng thì cho mảng rỗng
+        setHistory([]);
       }
     } catch (err) {
       console.error("Lỗi khi tải lịch sử:", err);
-      setHistory([]); // Lỗi thì cũng cho mảng rỗng để không bị Crash trang
+      setHistory([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Chỉ chạy load() khi component mount
   useEffect(() => {
     load();
   }, []);
@@ -44,7 +40,6 @@ function History() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa dòng lịch sử này?")) return;
     try {
       const res = await deleteHistoryChat(id);
-      // Kiểm tra status 200 hoặc message từ backend mới
       if (res.status === 200 || res.data?.message === "Deleted") {
         setHistory(prev => prev.filter(item => item.id !== id));
       }
@@ -71,7 +66,7 @@ function History() {
         borderRadius: "15px", 
         boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         width: "100%",
-        maxWidth: "800px", // Chỉnh lại độ rộng cho đẹp
+        maxWidth: "800px",
         boxSizing: "border-box",
         borderTop: "6px solid #92A8D1"
       }}>

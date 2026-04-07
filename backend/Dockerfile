@@ -1,14 +1,11 @@
-# --- STAGE 1: Build Frontend ---
     FROM node:22-slim AS frontend-build
     WORKDIR /app/frontend
     COPY frontend/package*.json ./
     RUN npm install
     COPY frontend/ ./
-    # Quan trọng: Dán cứng link API là chính nó
     RUN echo "VITE_API_URL=/" > .env
     RUN npm run build
     
-    # --- STAGE 2: Chạy Backend & Phục vụ Frontend ---
     FROM python:3.10-slim
     
     ENV PYTHONDONTWRITEBYTECODE=1
@@ -38,7 +35,6 @@
     # Copy mã nguồn Backend
     COPY backend/ .
     
-    # Copy thành phẩm Frontend đã build từ Stage 1 vào thư mục static của Backend
     RUN mkdir -p static
     COPY --from=frontend-build /app/frontend/dist ./static
     

@@ -1,7 +1,6 @@
 import axios from "axios";
 
 // 1. Cấu hình BASE_URL
-// Khi deploy lên Azure cùng một project, em có thể để trống "" hoặc dùng link Azure
 const BASE_URL = "https://thu-student-rag.azurewebsites.net";
 
 const API = axios.create({
@@ -13,12 +12,11 @@ const API = axios.create({
 
 // ================= 2. API CHAT & HISTORY =================
 
-// Gửi đồng thời question và email dưới dạng JSON body (Khớp với QuestionRequest trong Python)
 export const askQuestion = (question, email) => {
   return API.post("/chat", { question, email });
 };
 
-// Lấy lịch sử chat (Dùng params để truyền ?email=... tránh lỗi 422)
+// Lấy lịch sử chat 
 export const getHistory = (email) => {
   return API.get("/history", { 
     params: { email: email } 
@@ -58,17 +56,14 @@ export const rebuildAI = () => {
 
 // ================= 4. QUẢN LÝ NGƯỜI DÙNG (ADMIN) =================
 
-// Cập nhật thông tin cá nhân
 export const updateProfile = (data) => {
   return API.post("/user/update_profile", data);
 };
 
-// Lấy danh sách toàn bộ user cho trang Admin (Fix lỗi .map)
 export const getAllUsers = () => {
   return API.get("/admin/users");
 };
 
-// Xóa user (Admin)
 export const deleteUser = (email) => {
   return API.delete(`/admin/user/${encodeURIComponent(email)}`);
 };
