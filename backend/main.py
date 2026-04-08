@@ -150,6 +150,28 @@ def delete_user(email: str):
     conn.close()
     return {"message": "User deleted"}
 
+
+# ================= ANALYTICS =================
+@app.get("/analytics")
+def analytics():
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT question, COUNT(*) as total
+    FROM chats
+    GROUP BY question
+    ORDER BY total DESC
+    LIMIT 10
+    """)
+
+    data = cursor.fetchall()
+
+    conn.close()
+    return data
+
+
 # ================= 5. PHỤC VỤ GIAO DIỆN (QUAN TRỌNG NHẤT) =================
 
 if os.path.exists("static/assets"):
