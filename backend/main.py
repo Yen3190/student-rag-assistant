@@ -172,7 +172,7 @@ def analytics():
     return data
 
 
-# ================= 5. PHỤC VỤ GIAO DIỆN (QUAN TRỌNG NHẤT) =================
+# ================= 5. PHỤC VỤ GIAO DIỆN=================
 
 if os.path.exists("static/assets"):
     app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
